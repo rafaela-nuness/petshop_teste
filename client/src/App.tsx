@@ -45,7 +45,7 @@ function App() {
           <Toaster />
           <footer className="bg-secondary/20 py-12 mt-24 border-t">
             <div className="container mx-auto px-4 text-center text-muted-foreground">
-              <p>&copy; 2024 PetLove. Feito com amor para o seu pet.</p>
+              <p>&copy; 2024 Orelha. Feito com amor para o seu pet.</p>
             </div>
           </footer>
         </div>
