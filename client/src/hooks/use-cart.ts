@@ -23,10 +23,17 @@ export function useCart() {
 
   const addToCart = (product: any) => {
     setItems((current) => {
-      const existing = current.find((item) => item.productId === product.id);
+      // Use productId consistently. Newly created products from API will have 'id'.
+      const productId = typeof product.id === 'number' ? product.id : product.productId;
+      if (!productId) {
+        console.error("Invalid product added to cart", product);
+        return current;
+      }
+
+      const existing = current.find((item) => item.productId === productId);
       if (existing) {
         return current.map((item) =>
-          item.productId === product.id
+          item.productId === productId
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
@@ -34,7 +41,7 @@ export function useCart() {
       return [
         ...current,
         {
-          productId: product.id,
+          productId: productId,
           name: product.name,
           price: product.price,
           imageUrl: product.imageUrl,

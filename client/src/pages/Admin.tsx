@@ -1,4 +1,4 @@
-import { useProducts, useDeleteProduct, useCreateProduct } from "@/hooks/use-products";
+import { useProducts, useDeleteProduct, useCreateProduct, useUpdateProduct } from "@/hooks/use-products";
 import { useAppointments } from "@/hooks/use-services";
 import { useOrders } from "@/hooks/use-orders";
 import { useUser } from "@/hooks/use-auth";
@@ -10,12 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Trash2, Plus } from "lucide-react";
-import { useState } from "react";
+import { Trash2, Plus, Edit2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertProductSchema } from "@shared/schema";
-import type { InsertProduct } from "@shared/schema";
+import type { InsertProduct, Product } from "@shared/schema";
 
 export default function Admin() {
   const { data: user, isLoading: isUserLoading } = useUser();
@@ -61,7 +61,9 @@ function ProductsPanel() {
   const { data: products } = useProducts();
   const deleteProduct = useDeleteProduct();
   const createProduct = useCreateProduct();
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const updateProduct = useUpdateProduct();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const form = useForm<InsertProduct>({
     resolver: zodResolver(insertProductSchema),
@@ -71,31 +73,61 @@ function ProductsPanel() {
     }
   });
 
+  useEffect(() => {
+    if (editingProduct) {
+      form.reset({
+        name: editingProduct.name,
+        description: editingProduct.description,
+        price: editingProduct.price,
+        category: editingProduct.category,
+        imageUrl: editingProduct.imageUrl,
+      });
+    } else {
+      form.reset({
+        name: "",
+        description: "",
+        price: 0,
+        category: "racao",
+        imageUrl: "https://images.unsplash.com/photo-1589924691195-41432c84c161?w=400"
+      });
+    }
+  }, [editingProduct, form]);
+
   const onSubmit = (data: InsertProduct) => {
-    // Coerce price to number if it came from string input
     const payload = { ...data, price: Number(data.price) };
-    createProduct.mutate(payload, {
-      onSuccess: () => {
-        setIsCreateOpen(false);
-        form.reset();
-      }
-    });
+    if (editingProduct) {
+      updateProduct.mutate({ id: editingProduct.id, data: payload }, {
+        onSuccess: () => {
+          setIsDialogOpen(false);
+          setEditingProduct(null);
+        }
+      });
+    } else {
+      createProduct.mutate(payload, {
+        onSuccess: () => {
+          setIsDialogOpen(false);
+        }
+      });
+    }
   };
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Gerenciar Produtos</CardTitle>
-        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) setEditingProduct(null);
+        }}>
           <DialogTrigger asChild>
-            <Button>
+            <Button onClick={() => setEditingProduct(null)}>
               <Plus className="w-4 h-4 mr-2" />
               Novo Produto
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Adicionar Produto</DialogTitle>
+              <DialogTitle>{editingProduct ? "Editar Produto" : "Adicionar Produto"}</DialogTitle>
             </DialogHeader>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
               <div className="space-y-2">
@@ -113,7 +145,7 @@ function ProductsPanel() {
                 </div>
                 <div className="space-y-2">
                   <Label>Categoria</Label>
-                  <Select onValueChange={(val) => form.setValue("category", val)} defaultValue={form.getValues("category")}>
+                  <Select onValueChange={(val) => form.setValue("category", val)} value={form.watch("category")}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
@@ -142,7 +174,9 @@ function ProductsPanel() {
                     </Button>
                   </div>
                 </div>
-              <Button type="submit" className="w-full" disabled={createProduct.isPending}>Salvar</Button>
+              <Button type="submit" className="w-full" disabled={createProduct.isPending || updateProduct.isPending}>
+                {editingProduct ? "Atualizar" : "Salvar"}
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -162,6 +196,16 @@ function ProductsPanel() {
                 <span className="font-bold text-primary">
                   {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(product.price / 100)}
                 </span>
+                <Button 
+                  size="icon" 
+                  variant="outline" 
+                  onClick={() => {
+                    setEditingProduct(product);
+                    setIsDialogOpen(true);
+                  }}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </Button>
                 <Button 
                   size="icon" 
                   variant="destructive" 

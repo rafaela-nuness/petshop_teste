@@ -189,5 +189,26 @@ async function seedDatabase() {
       duration: 30,
       imageUrl: "https://images.unsplash.com/photo-1628009368231-760335298025?w=500&q=80"
     });
+    await storage.createService({
+      name: "Adestramento Comportamental",
+      description: "Sessões individuais para melhorar o comportamento e obediência.",
+      price: 12000,
+      duration: 60,
+      imageUrl: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=500&q=80"
+    });
+    await storage.createService({
+      name: "Hospedagem Pet",
+      description: "Ambiente seguro e confortável para o seu pet passar a noite.",
+      price: 8000,
+      duration: 1440,
+      imageUrl: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=500&q=80"
+    });
+    await storage.createService({
+      name: "Fisioterapia e Reabilitação",
+      description: "Tratamentos especializados para recuperação motora.",
+      price: 18000,
+      duration: 45,
+      imageUrl: "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=500&q=80"
+    });
   }
 }

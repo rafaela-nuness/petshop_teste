@@ -59,6 +59,35 @@ export function useCreateProduct() {
   });
 }
 
+export function useUpdateProduct() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number, data: Partial<InsertProduct> }) => {
+      const url = buildUrl(api.products.update.path, { id });
+      const res = await fetch(url, {
+        method: api.products.update.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to update product");
+      return api.products.update.responses[200].parse(await res.json());
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.products.list.path] });
+      toast({ title: "Sucesso", description: "Produto atualizado com sucesso!" });
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Erro", 
+        description: "Falha ao atualizar produto.", 
+        variant: "destructive" 
+      });
+    },
+  });
+}
+
 export function useDeleteProduct() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
