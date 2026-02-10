@@ -1,34 +1,32 @@
-# Guia de Hospedagem no Render
+# Guia de Deploy no Render (Petshop Orelha)
 
-Este guia detalha como hospedar este sistema no [Render](https://render.com/).
+Este guia explica como colocar sua aplicação em produção no Render.
 
 ## 1. Banco de Dados (PostgreSQL)
-
-1. Crie um "New PostgreSQL" no dashboard do Render.
-2. Copie a **Internal Database URL** (para uso entre serviços no Render) ou a **External Database URL** (para acesso local).
+1. No painel do Render, clique em **New +** e selecione **PostgreSQL**.
+2. Dê um nome ao banco (ex: `orelha-db`) e clique em **Create Database**.
+3. Após a criação, copie a **Internal Database URL**.
 
 ## 2. Aplicação (Web Service)
-
-Como este projeto é um monorepo (Frontend e Backend no mesmo processo), seguiremos estes passos:
-
-1. Clique em **New +** > **Web Service**.
+1. Clique em **New +** e selecione **Web Service**.
 2. Conecte seu repositório GitHub.
 3. Configure os detalhes do serviço:
+   - **Name**: `petshop-orelha`
    - **Runtime**: `Node`
    - **Build Command**: `npm install && npm run build`
    - **Start Command**: `npm start`
-4. Vá em **Environment Variables** e adicione:
-   - `DATABASE_URL`: A URL do seu banco de dados no Render.
-   - `SESSION_SECRET`: Uma string longa e aleatória para as sessões.
+4. Clique em **Advanced** e adicione as seguintes **Environment Variables**:
+   - `DATABASE_URL`: (Cole a URL do seu banco de dados)
+   - `SESSION_SECRET`: (Uma string aleatória e segura, ex: `7c3aed-secret-key-123`)
    - `NODE_ENV`: `production`
 
-## 3. Comandos Importantes
-
-Para subir o banco de dados pela primeira vez após configurar a `DATABASE_URL` localmente:
+## 3. Sincronização do Banco de Dados
+Para criar as tabelas no banco de dados de produção, você pode rodar o comando localmente apontando para a URL externa do banco ou configurar um "Render Blueprint" (mais avançado).
+A forma mais simples é rodar uma vez localmente:
 ```bash
-npx drizzle-kit push
+DATABASE_URL=sua_url_externa_do_render npm run db:push
 ```
 
-## 4. Notas sobre o Render
-- O Render possui um plano gratuito para Web Services, mas ele "dorme" após 15 minutos de inatividade.
-- O PostgreSQL no plano gratuito do Render expira após 90 dias.
+## 4. Resumo de Comandos
+- **Build**: `npm run build` (Gera o frontend e prepara o servidor)
+- **Start**: `npm start` (Inicia o servidor em produção)
