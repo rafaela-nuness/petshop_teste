@@ -12,6 +12,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
+import { ThemeToggle } from "./ThemeToggle";
+
 export function Header() {
   const [location] = useLocation();
   const { count } = useCart();
@@ -37,7 +39,7 @@ export function Header() {
             <PawPrint className="w-6 h-6" />
           </div>
           <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60 font-display">
-            PetLove
+            Orelha
           </span>
         </Link>
 
@@ -58,6 +60,7 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-4">
+          <ThemeToggle />
           <Link href="/cart">
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingCart className="w-5 h-5 text-foreground/80" />

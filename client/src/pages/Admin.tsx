@@ -126,10 +126,22 @@ function ProductsPanel() {
                   </Select>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>URL da Imagem</Label>
-                <Input {...form.register("imageUrl")} />
-              </div>
+                <div className="space-y-2">
+                  <Label>URL da Imagem</Label>
+                  <div className="flex gap-2">
+                    <Input {...form.register("imageUrl")} />
+                    <Button 
+                      type="button" 
+                      variant="outline"
+                      onClick={() => {
+                        const url = prompt("Insira a URL da nova imagem:");
+                        if (url) form.setValue("imageUrl", url);
+                      }}
+                    >
+                      Alterar
+                    </Button>
+                  </div>
+                </div>
               <Button type="submit" className="w-full" disabled={createProduct.isPending}>Salvar</Button>
             </form>
           </DialogContent>
